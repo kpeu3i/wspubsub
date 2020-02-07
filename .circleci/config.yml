@@ -1,10 +1,10 @@
-version: 2
+version: 2.1
 
 orbs:
     codecov: codecov/codecov@1.0.2
 
 jobs:
-    tests:
+    build:
         docker:
             - image: circleci/golang:1.12
         steps:
@@ -24,7 +24,7 @@ jobs:
                       - "/go/pkg/mod"
 
 workflows:
-    version: 2
-    tests:
+    version: 2.1
+    build:
         jobs:
-            - tests
+            - build
