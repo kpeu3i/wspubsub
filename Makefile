@@ -29,12 +29,12 @@ mocks-generate:
 test:
     ifneq ($(p),)
         ifneq ($(t),)
-			@go test -cover -coverprofile=coverage.out -race ${p} -v -run ${t} && go tool cover -html=coverage.out -o coverage.html
+			@go test -cover -covermode=atomic -coverprofile=coverage.out -race ${p} -v -run ${t} && go tool cover -html=coverage.out -o coverage.html
         else
-			@go test -cover -coverprofile=coverage.out -race ${p} -v && go tool cover -html=coverage.out -o coverage.html
+			@go test -cover -covermode=atomic -coverprofile=coverage.out -race ${p} -v && go tool cover -html=coverage.out -o coverage.html
         endif
     else
-		@go test -cover -coverprofile=coverage.out -race -v ./... && go tool cover -html=coverage.out -o coverage.html
+		@go test -cover -covermode=atomic -coverprofile=coverage.out -race -v ./... && go tool cover -html=coverage.out -o coverage.html
     endif
 
 .PHONY: help
