@@ -51,8 +51,9 @@ func main() {
 
 	publishTicker := time.NewTicker(publishIntervalDuration)
 	payload := messagePayload(*messageSize)
-	quitSignals := make(chan os.Signal, 1)
-	signal.Notify(quitSignals, syscall.SIGINT, syscall.SIGTERM)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	hub := wspubsub.NewDefaultHub()
 
@@ -89,7 +90,7 @@ func main() {
 
 	go publish(hub, publishTicker, publishChannelList, payload)
 
-	<-quitSignals
+	<-quit
 
 	publishTicker.Stop()
 
