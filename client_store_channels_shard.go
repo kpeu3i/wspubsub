@@ -72,5 +72,10 @@ func (s *clientStoreChannelsShard) Iterate(iterateFunc func(client WebsocketClie
 }
 
 func newClientStoreChannelsShard(size int, bucketSize int) *clientStoreChannelsShard {
-	return &clientStoreChannelsShard{bucketSize: bucketSize, clients: make(map[string]clientStoreChannelsShardBucket, size)}
+	shard := &clientStoreChannelsShard{
+		bucketSize: bucketSize,
+		clients:    make(map[string]clientStoreChannelsShardBucket, size),
+	}
+
+	return shard
 }

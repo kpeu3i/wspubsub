@@ -11,6 +11,7 @@ type GobwasUpgraderOptions struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// nolint: gomnd
 func NewGobwasUpgraderOptions() GobwasUpgraderOptions {
 	options := GobwasUpgraderOptions{
 		ReadTimout:         60 * time.Second,

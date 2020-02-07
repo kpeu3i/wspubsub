@@ -10,6 +10,10 @@ import (
 
 type IterateFunc func(client WebsocketClient) error
 
+type clientsBuffer struct {
+	clients []WebsocketClient
+}
+
 type ClientStore struct {
 	options           ClientStoreOptions
 	logger            Logger
@@ -114,31 +118,32 @@ func (s *ClientStore) Find(fn IterateFunc, channels ...string) error {
 		}()
 	}
 
-	clients := s.clientsPool.Get().([]WebsocketClient)
+	buff := s.clientsPool.Get().(*clientsBuffer)
 
 	if len(channels) == 0 {
 		for _, clientsShard := range s.clientsShardList {
 			clientsShard.Iterate(func(client WebsocketClient) {
-				clients = append(clients, client)
+				buff.clients = append(buff.clients, client)
 			})
 		}
 	} else {
 		for _, channel := range channels {
 			channelsShard := s.channelsShard(channel)
 			channelsShard.Iterate(func(client WebsocketClient, channel string) {
-				clients = append(clients, client)
+				buff.clients = append(buff.clients, client)
 			})
 		}
 	}
 
-	for _, client := range clients {
+	for _, client := range buff.clients {
 		err := fn(client)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 	}
 
-	s.clientsPool.Put(clients[:0])
+	buff.clients = buff.clients[:0]
+	s.clientsPool.Put(buff)
 
 	return nil
 }
@@ -269,17 +274,23 @@ func NewClientStore(options ClientStoreOptions, logger Logger) *ClientStore {
 		channelsShardList: make([]*clientStoreChannelsShard, options.ChannelShards.Count),
 		clientsPool: sync.Pool{
 			New: func() interface{} {
-				return make([]WebsocketClient, 0, options.ClientShards.Size)
+				return &clientsBuffer{clients: make([]WebsocketClient, 0, options.ClientShards.Size)}
 			},
 		},
 	}
 
 	for i := 0; i < options.ClientShards.Count; i++ {
-		clientList.clientsShardList[i] = newClientStoreClientsShard(options.ClientShards.Size, options.ClientShards.BucketSize)
+		clientList.clientsShardList[i] = newClientStoreClientsShard(
+			options.ClientShards.Size,
+			options.ClientShards.BucketSize,
+		)
 	}
 
 	for i := 0; i < options.ChannelShards.Count; i++ {
-		clientList.channelsShardList[i] = newClientStoreChannelsShard(options.ChannelShards.Size, options.ChannelShards.BucketSize)
+		clientList.channelsShardList[i] = newClientStoreChannelsShard(
+			options.ChannelShards.Size,
+			options.ChannelShards.BucketSize,
+		)
 	}
 
 	return clientList

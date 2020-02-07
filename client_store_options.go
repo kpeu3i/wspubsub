@@ -17,6 +17,7 @@ type ClientStoreOptions struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// nolint: gomnd
 func NewClientStoreOptions() ClientStoreOptions {
 	options := ClientStoreOptions{
 		IsDebug:            false,

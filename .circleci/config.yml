@@ -13,6 +13,9 @@ jobs:
                   keys:
                       - go-mod-v4-{{ checksum "go.sum" }}
             - run:
+                  name: Run lints
+                  command: make lint
+            - run:
                   name: Run unit tests
                   command: make test
             - codecov/upload:

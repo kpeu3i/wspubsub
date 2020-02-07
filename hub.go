@@ -71,6 +71,7 @@ type (
 	ErrorHandler      func(clientID UUID, err error)
 )
 
+// nolint: gochecknoglobals
 var (
 	defaultConnectHandler    = ConnectHandler(func(clientID UUID) {})
 	defaultDisconnectHandler = DisconnectHandler(func(clientID UUID) {})
@@ -545,7 +546,12 @@ func (h *Hub) wrapErrorHandler(handler ErrorHandler) ErrorHandler {
 	}
 }
 
-func NewHub(options HubOptions, clientStore WebsocketClientStore, clientFactory WebsocketClientFactory, logger Logger) *Hub {
+func NewHub(
+	options HubOptions,
+	clientStore WebsocketClientStore,
+	clientFactory WebsocketClientFactory,
+	logger Logger,
+) *Hub {
 	hub := &Hub{
 		options:       options,
 		clients:       clientStore,

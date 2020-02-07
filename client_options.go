@@ -9,6 +9,7 @@ type ClientOptions struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// nolint: gomnd
 func NewClientOptions() ClientOptions {
 	return ClientOptions{
 		PingInterval:       10 * time.Second,

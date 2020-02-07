@@ -20,6 +20,7 @@ type GorillaUpgraderOptions struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// nolint: gomnd
 func NewGorillaUpgraderOptions() GorillaUpgraderOptions {
 	options := GorillaUpgraderOptions{
 		MaxMessageSize:  1 * 1024 * 1024,

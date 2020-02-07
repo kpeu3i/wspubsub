@@ -9,6 +9,7 @@ default: help
 .PHONY: deps-install
 # @HELP Intsall project dependencies
 deps-install:
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.23.3
 	@go get -v github.com/golang/mock/mockgen
 
 .PHONY: mocks-generate
@@ -16,6 +17,11 @@ deps-install:
 mocks-generate:
 	@mockgen -source=hub.go -destination=mock/hub.go -package=mock
 	@mockgen -source=client_factory.go -destination=mock/client_factory.go -package=mock
+
+.PHONY: lint
+# @HELP Lint source code
+lint:
+	@golangci-lint run --tests=false -v
 
 .PHONY: test
 # Examples:

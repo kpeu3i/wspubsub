@@ -1,0 +1,11 @@
+run:
+    deadline: 1m
+
+linters:
+    enable-all: true
+    disable:
+        - wsl
+
+issues:
+    exclude:
+        - by other packages, and that stutters; consider calling this

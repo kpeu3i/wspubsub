@@ -10,6 +10,7 @@ type HubOptions struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// nolint: gomnd
 func NewHubOptions() HubOptions {
 	return HubOptions{
 		ShutdownTimeout:    10 * time.Second,
