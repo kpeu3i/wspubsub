@@ -13,6 +13,10 @@ jobs:
                   keys:
                       - go-mod-v4-{{ checksum "go.sum" }}
             - run:
+                  name: Install deps
+                  command: |
+                        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.3
+            - run:
                   name: Run lints
                   command: make lint
             - run:
