@@ -34,49 +34,83 @@ import "github.com/kpeu3i/wspubsub"
 A minimal working example is listed below:
 
 ```go
-hub := wspubsub.NewDefaultHub()
-defer hub.Close()
+package main
 
-publishTicker := time.NewTicker(publishIntervalDuration)
-defer publishTicker.Stop()
+import (
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-hub.OnReceive(func(clientID wspubsub.UUID, message wspubsub.Message) {
-    m := Message{}
-    err := json.Unmarshal(message.Payload, &m)
-    if err != nil {
-        hub.LogError(errors.Wrap(err, "hub.on_receive.unmarshal"))
-        return
-    }
+	"github.com/kpeu3i/wspubsub"
+	"github.com/pkg/errors"
+)
 
-    switch m.Command {
-    case "SUBSCRIBE":
-        err := hub.Subscribe(clientID, m.Channels...)
-        if err != nil {
-            hub.LogError(errors.Wrap(err, "hub.on_receive.subscribe"))
-        }
-    case "UNSUBSCRIBE":
-        err := hub.Unsubscribe(clientID, m.Channels...)
-        if err != nil {
-            hub.LogError(errors.Wrap(err, "hub.on_receive.unsubscribe"))
-        }
-    }
-})
+type Message struct {
+	Command  string   `json:"command"`
+	Channels []string `json:"channels"`
+}
 
-go func() {
-    err := hub.ListenAndServe("localhost:8080", "/")
-    if err != nil {
-        hub.LogPanic(err)
-    }
-}()
+func main() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-go func() {
-    message := wspubsub.NewTextMessageFromString(`{"demo": true}`)
-    for range publishTicker.C {
-        _, err := hub.Publish(message, publishChannelList...)
-        if err != nil {
-            hub.LogPanic(err)
-        }
-    }
-}()
+	channels := []string{"general", "public", "private"}
+	messageFormat := `{"now": %d}`
+
+	hub := wspubsub.NewDefaultHub()
+	defer hub.Close()
+
+	publishTicker := time.NewTicker(1 * time.Second)
+	defer publishTicker.Stop()
+
+	hub.OnReceive(func(clientID wspubsub.UUID, message wspubsub.Message) {
+		m := Message{}
+		err := json.Unmarshal(message.Payload, &m)
+		if err != nil {
+			hub.LogError(errors.Wrap(err, "hub.on_receive.unmarshal"))
+			return
+		}
+
+		switch m.Command {
+		case "SUBSCRIBE":
+			err := hub.Subscribe(clientID, m.Channels...)
+			if err != nil {
+				hub.LogError(errors.Wrap(err, "hub.on_receive.subscribe"))
+			}
+		case "UNSUBSCRIBE":
+			err := hub.Unsubscribe(clientID, m.Channels...)
+			if err != nil {
+				hub.LogError(errors.Wrap(err, "hub.on_receive.unsubscribe"))
+			}
+		}
+	})
+
+	go func() {
+		err := hub.ListenAndServe("localhost:8080", "/")
+		if err != nil {
+			hub.LogPanic(err)
+		}
+	}()
+
+	go func() {
+		for range publishTicker.C {
+			// Pick a random channel
+			channel := channels[rand.Intn(len(channels))]
+			message := wspubsub.NewTextMessageFromString(fmt.Sprintf(messageFormat, time.Now().Unix()))
+			_, err := hub.Publish(message, channel)
+			if err != nil {
+				hub.LogPanic(err)
+			}
+
+			hub.LogInfof("Published: channel=%s, message=%s\n", channel, string(message.Payload))
+		}
+	}()
+
+	<-quit
+}
 ````
 More examples you can find in [examples](https://github.com/kpeu3i/wspubsub/tree/master/examples/) directory.

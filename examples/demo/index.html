@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>WSPubSub</title>
+    <script type="application/javascript">
+        let connection;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("connect").addEventListener("click", function () {
+                let onOpen = function(event) {
+                    document.getElementById("status").className = "badge badge-success";
+                    document.getElementById("status").textContent = "Connected"
+                };
+
+                let onMessage = function(event) {
+                    document.getElementById("messages").value += "--> " + event.data + "\n";
+                    document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+                };
+
+                let onClose = function(event) {
+                    document.getElementById("status").className = "badge badge-secondary";
+                    document.getElementById("status").textContent = "Not connected"
+                };
+
+                let onError = function(error) {
+                    document.getElementById("status").className = "badge badge-error";
+                    document.getElementById("status").value = `Not connected (error: ${error.message})`
+                };
+
+                connection = connect(
+                    document.getElementById("url").value,
+                    onOpen,
+                    onMessage,
+                    onClose,
+                    onError
+                )
+            });
+
+            document.getElementById("disconnect").addEventListener("click", function () {
+                disconnect(connection)
+            });
+
+            document.getElementById("subscribe").addEventListener("click", function () {
+                let channel = document.getElementById("channel").value;
+                let message = subscribe(connection, channel);
+
+                if (message !== "") {
+                    document.getElementById("messages").value += "<-- " + message + "\n";
+
+                    let found = false;
+                    let children = document.getElementById("subscription").children;
+                    for (let i = 0; i < children.length; i++) {
+                        if (children[i].textContent === channel) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        if (document.getElementById("subscription").textContent === "None") {
+                            document.getElementById("subscription").textContent = ""
+                        }
+
+                        let link = document.createElement('a');
+                        link.href = "#";
+                        link.className = "badge badge-warning subscription-channel";
+                        link.text = channel;
+                        link.onclick = function() {
+                            document.getElementById("channel").value = channel;
+
+                            return false
+                        };
+                        document.getElementById("subscription").appendChild(link);
+                        document.getElementById("subscription").appendChild(document.createTextNode(" "));
+                    }
+                }
+            });
+
+            document.getElementById("unsubscribe").addEventListener("click", function () {
+                let channel = document.getElementById("channel").value;
+                let message = unsubscribe(connection, channel);
+
+                if (message !== "") {
+                    document.getElementById("messages").value += "<-- " + message + "\n";
+
+                    let children = document.getElementById("subscription").children;
+                    for (let i = 0; i < children.length; i++) {
+                        if (children[i].textContent === channel) {
+                            children[i].remove();
+                            break;
+                        }
+                    }
+
+                    if (document.getElementById("subscription").textContent.trim() === "") {
+                        document.getElementById("subscription").textContent = "None"
+                    }
+                }
+            });
+        });
+
+        function connect(url, onOpen, onMessage, onClose, onError) {
+            let connection = new WebSocket(url);
+
+            connection.onopen = function(event) {
+                onOpen(event)
+            };
+
+            connection.onmessage = function(event) {
+                onMessage(event)
+            };
+
+            connection.onclose = function(event) {
+                onClose(event)
+            };
+
+            connection.onerror = function(error) {
+                onError(error)
+            };
+
+            return connection
+        }
+
+        function disconnect(connection) {
+            if (connection instanceof WebSocket) {
+                if (connection.readyState === WebSocket.OPEN) {
+                    connection.close();
+                }
+            }
+        }
+
+        function subscribe(connection, channel) {
+            if (connection instanceof WebSocket) {
+                if (connection.readyState === WebSocket.OPEN) {
+                    let message = `{"command": "SUBSCRIBE", "channels": ["${channel}"]}`;
+                    connection.send(message);
+
+                    return message
+                }
+            }
+
+            return ""
+        }
+
+        function unsubscribe(connection, channel) {
+            if (connection instanceof WebSocket) {
+                if (connection.readyState === WebSocket.OPEN) {
+                    let message = `{"command": "UNSUBSCRIBE", "channels": ["${channel}"]}`;
+                    connection.send(message);
+
+                    return message
+                }
+            }
+
+            return ""
+        }
+    </script>
+</head>
+<body>
+    <div class="container-fluid">
+        <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5" role="main">
+            <form>
+                <div class="form-group">
+                    <div class="form-group">
+                        <label for="url">URL</label>
+                        <input type="text" class="form-control" id="url" placeholder="URL" value="ws://localhost:8080/">
+                    </div>
+                    <div class="form-group">
+                        Connection status:  <span id="status" class="badge badge-secondary">Not connected</span>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="connect">Connect</button>
+                    <button type="button" class="btn btn-primary" id="disconnect">Disconnect</button>
+
+                </div>
+                <div class="form-group">
+                    <div class="form-group">
+                        <label for="channel">Channel</label>
+                        <input type="text" class="form-control" id="channel" placeholder="Channel" value="general">
+                    </div>
+                    <div class="form-group">
+                        Subscription: <div class="d-inline" id="subscription">None</div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="subscribe">Subscribe</button>
+                    <button type="button" class="btn btn-primary" id="unsubscribe">Unsubscribe</button>
+                </div>
+                <div class="form-group">
+                    <label for="messages">Messages</label>
+                    <textarea class="form-control" id="messages" rows="10"></textarea>
+                </div>
+            </form>
+        </main>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
