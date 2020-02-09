@@ -126,6 +126,10 @@ func TestClientStore_Find(t *testing.T) {
 		}
 	}
 
+	t.Run("Count clients in unknown channel", func(t *testing.T) {
+		require.Equal(t, 0, clientStore.Count("UNKNOWN"))
+	})
+
 	t.Run("Count clients in a channel", func(t *testing.T) {
 		for _, channel := range availableChannels {
 			require.Equal(t, len(clients[channel]), clientStore.Count(channel))
@@ -144,6 +148,22 @@ func TestClientStore_Find(t *testing.T) {
 
 	t.Run("Count clients without channels", func(t *testing.T) {
 		require.Equal(t, numClients, clientStore.Count())
+	})
+
+	t.Run("Find clients in unknown channel", func(t *testing.T) {
+		foundClients := 0
+		channel := "UNKNOWN"
+
+		fn := func(client wspubsub.WebsocketClient) error {
+			foundClients++
+
+			return nil
+		}
+
+		err := clientStore.Find(fn, channel)
+		require.NoError(t, err)
+
+		require.Equal(t, 0, foundClients)
 	})
 
 	t.Run("Find clients in a random channel", func(t *testing.T) {

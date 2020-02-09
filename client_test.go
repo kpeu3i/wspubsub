@@ -3,6 +3,7 @@ package wspubsub_test
 import (
 	"fmt"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,7 +28,7 @@ func TestClient_ID(t *testing.T) {
 	require.Equal(t, client.ID(), clientID)
 }
 
-func TestClient_ConnectAndClose(t *testing.T) {
+func TestClient_ReuseConnectAndClose(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer func() {
 		time.Sleep(100 * time.Millisecond)
@@ -111,6 +112,55 @@ func TestClient_ConnectAndClose(t *testing.T) {
 	})
 }
 
+func TestClient_CloseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer func() {
+		time.Sleep(100 * time.Millisecond)
+		ctrl.Finish()
+	}()
+
+	closeErrText := "close_error"
+
+	request := httptest.NewRequest("GET", "/", nil)
+	response := httptest.NewRecorder()
+
+	logger := mock.NewMockLogger(ctrl)
+
+	connection := mock.NewMockWebsocketConnection(ctrl)
+
+	connection.
+		EXPECT().
+		Read().
+		Times(1).
+		Do(func() {
+			time.Sleep(5 * time.Second)
+		})
+
+	connection.
+		EXPECT().
+		Close().
+		Times(1).
+		Return(errors.New(closeErrText))
+
+	upgrader := mock.NewMockWebsocketConnectionUpgrader(ctrl)
+
+	upgrader.
+		EXPECT().
+		Upgrade(gomock.Eq(response), gomock.Eq(request)).
+		Return(connection, nil).
+		Times(1)
+
+	options := wspubsub.NewClientOptions()
+	client := wspubsub.NewClient(options, clientID, upgrader, logger)
+
+	err := client.Connect(response, request)
+	require.NoError(t, err)
+
+	err = client.Close()
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), closeErrText))
+}
+
 func TestClient_Write(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer func() {
@@ -118,9 +168,11 @@ func TestClient_Write(t *testing.T) {
 		ctrl.Finish()
 	}()
 
+	message := wspubsub.NewTextMessageFromString("TEST")
+	closedErr := wspubsub.NewConnectionClosedError(errors.New("i/o timeout"))
+
 	request := httptest.NewRequest("GET", "/", nil)
 	response := httptest.NewRecorder()
-	message := wspubsub.NewTextMessageFromString("TEST")
 
 	logger := mock.NewMockLogger(ctrl)
 
@@ -138,6 +190,12 @@ func TestClient_Write(t *testing.T) {
 		Write(gomock.Eq(message)).
 		Times(1)
 
+	connection.
+		EXPECT().
+		Write(gomock.Eq(message)).
+		Times(1).
+		Return(closedErr)
+
 	upgrader := mock.NewMockWebsocketConnectionUpgrader(ctrl)
 	upgrader.
 		EXPECT().
@@ -147,8 +205,15 @@ func TestClient_Write(t *testing.T) {
 
 	options := wspubsub.NewClientOptions()
 	client := wspubsub.NewClient(options, clientID, upgrader, logger)
+	client.OnError(func(id wspubsub.UUID, err error) {
+		require.Equal(t, clientID, id)
+		require.Equal(t, wspubsub.NewClientSendError(clientID, message, closedErr), errors.Cause(err).(*wspubsub.ClientSendError))
+	})
 
 	err := client.Connect(response, request)
+	require.NoError(t, err)
+
+	err = client.Send(message)
 	require.NoError(t, err)
 
 	err = client.Send(message)

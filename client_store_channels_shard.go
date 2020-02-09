@@ -61,11 +61,11 @@ func (s *clientStoreChannelsShard) Count(channels ...string) int {
 	return count
 }
 
-func (s *clientStoreChannelsShard) Iterate(iterateFunc func(client WebsocketClient, channel string)) {
+func (s *clientStoreChannelsShard) Iterate(channel string, iterateFunc func(client WebsocketClient)) {
 	s.mu.RLock()
-	for channel, clients := range s.clients {
+	if clients, ok := s.clients[channel]; ok {
 		for _, client := range clients {
-			iterateFunc(client, channel)
+			iterateFunc(client)
 		}
 	}
 	s.mu.RUnlock()

@@ -129,7 +129,7 @@ func (s *ClientStore) Find(fn IterateFunc, channels ...string) error {
 	} else {
 		for _, channel := range channels {
 			channelsShard := s.channelsShard(channel)
-			channelsShard.Iterate(func(client WebsocketClient, channel string) {
+			channelsShard.Iterate(channel, func(client WebsocketClient) {
 				buff.clients = append(buff.clients, client)
 			})
 		}
