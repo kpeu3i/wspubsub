@@ -114,3 +114,34 @@ func main() {
 }
 ````
 More examples you can find in [examples](https://github.com/kpeu3i/wspubsub/tree/master/examples/) directory.
+
+## Lint and test
+
+First, you need to install project dependencies (golangci, mockgen, etc):
+
+    $ make deps-install
+
+Now, you are able to run:
+
+    $ make lint
+    $ make test
+
+If it required to update mocks use the following command:
+
+    $ make mocks-generate
+
+# Contributing
+
+Please don't hesitate to fork the project and send a pull request me to ask questions and share ideas.
+
+1. Fork it
+2. Download the fork (`git clone https://github.com/kpeu3i/wspubsub.git && cd wspubsub`)
+3. Create your feature branch (`git checkout -b my-new-feature`)
+4. Make changes and add them (`git add .`)
+5. Commit your changes (`git commit -m 'Add some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create new pull request
+
+## License
+
+This library is released under the MIT license. See the [LICENSE](https://github.com/kpeu3i/wspubsub/blob/master/LICENSE) file for details.
