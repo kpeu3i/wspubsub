@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Client represents a connection to the WebSocket server.
 type Client struct {
 	options        ClientOptions
 	id             UUID
@@ -21,10 +22,12 @@ type Client struct {
 	quit           chan struct{}
 }
 
+// ID returns unique client id.
 func (c *Client) ID() UUID {
 	return c.id
 }
 
+// Connect upgrades the HTTP server connection to the WebSocket protocol.
 func (c *Client) Connect(response http.ResponseWriter, request *http.Request) error {
 	if c.options.IsDebug {
 		now := time.Now()
@@ -54,14 +57,17 @@ func (c *Client) Connect(response http.ResponseWriter, request *http.Request) er
 	return nil
 }
 
+// OnReceive registers a handler for incoming messages.
 func (c *Client) OnReceive(handler ReceiveHandler) {
 	c.receiveHandler.Store(handler)
 }
 
+// OnError registers a handler for errors occurred while reading or writing to connection.
 func (c *Client) OnError(handler ErrorHandler) {
 	c.errorHandler.Store(handler)
 }
 
+// Send writes a message to client connection asynchronously.
 func (c *Client) Send(message Message) error {
 	if c.options.IsDebug {
 		now := time.Now()
@@ -82,6 +88,7 @@ func (c *Client) Send(message Message) error {
 	return nil
 }
 
+// Close closes a client connection.
 func (c *Client) Close() error {
 	if c.options.IsDebug {
 		now := time.Now()
@@ -159,6 +166,7 @@ func (c *Client) runWriter() {
 	}
 }
 
+// NewClient initializes a new Client.
 func NewClient(options ClientOptions, id UUID, upgrader WebsocketConnectionUpgrader, logger Logger) *Client {
 	client := &Client{
 		options:  options,
