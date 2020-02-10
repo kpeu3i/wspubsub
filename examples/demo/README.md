@@ -21,8 +21,8 @@ channels | general,public,private | Publishing channels
 
 ### WEB
 
-    1. Open `index.html` in your browser
-    2. Click **Connect** button
-    2. Click **Subscribe** button
+1. Open `index.html` in your browser
+2. Click **Connect** button
+2. Click **Subscribe** button
 
 Now, every published message which is matched your subscription will be shown in the **Messages** field.
