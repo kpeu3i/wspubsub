@@ -130,7 +130,7 @@ If it required to update mocks use the following command:
 
     $ make mocks-generate
 
-# Contributing
+## Contributing
 
 Please don't hesitate to fork the project and send a pull request me to ask questions and share ideas.
 
