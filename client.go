@@ -62,7 +62,7 @@ func (c *Client) OnReceive(handler ReceiveHandler) {
 	c.receiveHandler.Store(handler)
 }
 
-// OnError registers a handler for errors occurred while reading or writing to connection.
+// OnError registers a handler for errors occurred while reading or writing connection.
 func (c *Client) OnError(handler ErrorHandler) {
 	c.errorHandler.Store(handler)
 }
@@ -119,17 +119,17 @@ func (c *Client) Close() error {
 }
 
 func (c *Client) runReader() {
+	receiveHandler := c.receiveHandler.Load().(ReceiveHandler)
+	errorHandler := c.errorHandler.Load().(ErrorHandler)
 	for {
 		message, err := c.connection.Read()
 		if err != nil {
 			err := errors.WithStack(NewClientReceiveError(c.id, message, err))
-			errorHandler := c.errorHandler.Load().(ErrorHandler)
 			errorHandler(c.id, err)
 
 			return
 		}
 
-		receiveHandler := c.receiveHandler.Load().(ReceiveHandler)
 		receiveHandler(c.id, message)
 	}
 }
@@ -141,7 +141,7 @@ func (c *Client) runWriter() {
 
 	pings := pingTicker.C
 	messages := c.messages
-
+	errorHandler := c.errorHandler.Load().(ErrorHandler)
 	for {
 		select {
 		case <-c.quit:
@@ -150,7 +150,6 @@ func (c *Client) runWriter() {
 			err := c.connection.Write(pingMessage)
 			if err != nil {
 				err := errors.WithStack(NewClientPingError(c.id, pingMessage, err))
-				errorHandler := c.errorHandler.Load().(ErrorHandler)
 				errorHandler(c.id, err)
 				pings = nil
 			}
@@ -158,7 +157,6 @@ func (c *Client) runWriter() {
 			err := c.connection.Write(message)
 			if err != nil {
 				err := errors.WithStack(NewClientSendError(c.id, message, err))
-				errorHandler := c.errorHandler.Load().(ErrorHandler)
 				errorHandler(c.id, err)
 				messages = nil
 			}
