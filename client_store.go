@@ -8,12 +8,15 @@ import (
 	"github.com/pkg/errors"
 )
 
+// IterateFunc is the type of the function called for
+// each client visited by Find.
 type IterateFunc func(client WebsocketClient) error
 
 type clientsBuffer struct {
 	clients []WebsocketClient
 }
 
+// ClientStore represents the storage of clients.
 type ClientStore struct {
 	options           ClientStoreOptions
 	logger            Logger
@@ -22,6 +25,7 @@ type ClientStore struct {
 	clientsPool       sync.Pool
 }
 
+// Get returns client by its ID.
 func (s *ClientStore) Get(clientID UUID) (WebsocketClient, error) {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -43,6 +47,7 @@ func (s *ClientStore) Get(clientID UUID) (WebsocketClient, error) {
 	return client, nil
 }
 
+// Set puts client to storage.
 func (s *ClientStore) Set(client WebsocketClient) {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -58,6 +63,7 @@ func (s *ClientStore) Set(client WebsocketClient) {
 	clientsShard.Set(client)
 }
 
+// Unset removes client from storage by its ID
 func (s *ClientStore) Unset(clientID UUID) error {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -79,6 +85,7 @@ func (s *ClientStore) Unset(clientID UUID) error {
 	return nil
 }
 
+// Count returns the total number of clients in specified channel(-s).
 func (s *ClientStore) Count(channels ...string) int {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -107,6 +114,7 @@ func (s *ClientStore) Count(channels ...string) int {
 	return count
 }
 
+// Find iterates over clients who subscribed on specified channel(-s).
 func (s *ClientStore) Find(fn IterateFunc, channels ...string) error {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -148,6 +156,7 @@ func (s *ClientStore) Find(fn IterateFunc, channels ...string) error {
 	return nil
 }
 
+// CountChannels return a list of channels linked with the client.
 func (s *ClientStore) Channels(clientID UUID) ([]string, error) {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -169,6 +178,7 @@ func (s *ClientStore) Channels(clientID UUID) ([]string, error) {
 	return channels, nil
 }
 
+// CountChannels return the total number of channels linked with the client.
 func (s *ClientStore) CountChannels(clientID UUID) (int, error) {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -190,6 +200,7 @@ func (s *ClientStore) CountChannels(clientID UUID) (int, error) {
 	return count, nil
 }
 
+// SetChannels links the client with specified channel(-s).
 func (s *ClientStore) SetChannels(clientID UUID, channels ...string) error {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -220,6 +231,9 @@ func (s *ClientStore) SetChannels(clientID UUID, channels ...string) error {
 	return nil
 }
 
+// SetChannels unlinks the client from specified channel(-s).
+// If channels were not specified then the client will be
+// unlinked from all channels.
 func (s *ClientStore) UnsetChannels(clientID UUID, channels ...string) error {
 	if s.options.IsDebug {
 		now := time.Now()
@@ -266,6 +280,7 @@ func (s *ClientStore) channelsShard(channel string) *clientStoreChannelsShard {
 	return s.channelsShardList[index]
 }
 
+// NewClientStore initializes a new ClientStore.
 func NewClientStore(options ClientStoreOptions, logger Logger) *ClientStore {
 	clientList := &ClientStore{
 		options:           options,
