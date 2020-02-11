@@ -23,6 +23,8 @@ const (
 	LevelTrace
 )
 
+var _ Logger = (*LogrusLogger)(nil)
+
 type LogrusLogger struct {
 	logger *logrus.Logger
 }
