@@ -4,7 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// LogrusFormatter represent a type of possible formatters.
+// LogrusFormatter enumerates possible formatters.
 type LogrusFormatter uint32
 
 const (
@@ -15,7 +15,7 @@ const (
 	LogrusFormatterJSON
 )
 
-// LogrusLevel represent a type of possible log levels.
+// LogrusLevel enumerates possible logging levels.
 type LogrusLevel uint32
 
 const (
