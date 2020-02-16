@@ -2,8 +2,10 @@ package wspubsub
 
 import "encoding/hex"
 
+// UUID represents a type compliant with specification described in RFC 4122.
 type UUID [16]byte
 
+// String returns canonical string representation of UUID.
 func (u UUID) String() string {
 	buf := make([]byte, 36)
 
@@ -20,6 +22,7 @@ func (u UUID) String() string {
 	return string(buf)
 }
 
+// Bytes returns bytes slice representation of UUID.
 func (u UUID) Bytes() []byte {
 	return u[:]
 }
