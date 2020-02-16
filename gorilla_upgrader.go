@@ -10,12 +10,14 @@ import (
 
 var _ WebsocketConnectionUpgrader = (*GorillaConnectionUpgrader)(nil)
 
+// GorillaConnectionUpgrader is an implementation of WebsocketConnectionUpgrader.
 type GorillaConnectionUpgrader struct {
-	options  GorillaUpgraderOptions
+	options  GorillaConnectionUpgraderOptions
 	logger   Logger
 	upgrader *websocket.Upgrader
 }
 
+// GorillaConnectionUpgrader upgrades HTTP connection to the WebSocket connection.
 func (u *GorillaConnectionUpgrader) Upgrade(w http.ResponseWriter, r *http.Request) (WebsocketConnection, error) {
 	if u.options.IsDebug {
 		now := time.Now()
@@ -56,7 +58,8 @@ func (u *GorillaConnectionUpgrader) Upgrade(w http.ResponseWriter, r *http.Reque
 	return gorillaConnection, nil
 }
 
-func NewGorillaConnectionUpgrader(options GorillaUpgraderOptions, logger Logger) *GorillaConnectionUpgrader {
+// NewGorillaConnectionUpgrader initializes a new GorillaConnectionUpgrader.
+func NewGorillaConnectionUpgrader(options GorillaConnectionUpgraderOptions, logger Logger) *GorillaConnectionUpgrader {
 	upgrader := &websocket.Upgrader{
 		HandshakeTimeout:  options.HandshakeTimeout,
 		ReadBufferSize:    options.ReadBufferSize,

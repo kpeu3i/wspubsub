@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewGorillaUpgraderOptions(t *testing.T) {
-	options := wspubsub.NewGorillaUpgraderOptions()
+	options := wspubsub.NewGorillaConnectionUpgraderOptions()
 	require.NotZero(t, options.MaxMessageSize)
 	require.NotZero(t, options.ReadTimout)
 	require.NotZero(t, options.WriteTimout)

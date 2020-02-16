@@ -19,7 +19,7 @@ var (
 
 func init() {
 	rand.Seed(time.Now().Unix())
-	logger = wspubsub.NewLogrusLogger(wspubsub.NewLogrusOptions())
+	logger = wspubsub.NewLogrusLogger(wspubsub.NewLogrusLoggerOptions())
 }
 
 func main() {

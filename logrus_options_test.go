@@ -8,6 +8,6 @@ import (
 )
 
 func TestNewLogrusOptions(t *testing.T) {
-	options := wspubsub.NewLogrusOptions()
+	options := wspubsub.NewLogrusLoggerOptions()
 	require.NotZero(t, options.Output)
 }

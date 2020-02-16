@@ -11,6 +11,7 @@ import (
 
 var _ WebsocketConnection = (*GorillaConnection)(nil)
 
+// GorillaConnection is an implementation of WebsocketConnection.
 type GorillaConnection struct {
 	conn               *websocket.Conn
 	logger             Logger
@@ -21,6 +22,7 @@ type GorillaConnection struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// Read reads a message from WebSocket connection.
 func (c *GorillaConnection) Read() (Message, error) {
 	err := c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
 	if err != nil {
@@ -40,6 +42,7 @@ func (c *GorillaConnection) Read() (Message, error) {
 	return message, nil
 }
 
+// Write writes a message to WebSocket connection.
 func (c *GorillaConnection) Write(message Message) error {
 	if c.IsDebug {
 		now := time.Now()
@@ -64,6 +67,7 @@ func (c *GorillaConnection) Write(message Message) error {
 	return nil
 }
 
+// Close closes a WebSocket connection.
 func (c *GorillaConnection) Close() error {
 	if c.IsDebug {
 		now := time.Now()

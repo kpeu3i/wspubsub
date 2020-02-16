@@ -516,7 +516,7 @@ func (h *Hub) LogFatalln(args ...interface{}) {
 	h.logger.Fatalln(args...)
 }
 
-// LogFatalln is like LogFatal but adds a new line.
+// LogPanicln is like LogPanic but adds a new line.
 func (h *Hub) LogPanicln(args ...interface{}) {
 	h.logger.Panicln(args...)
 }
@@ -626,15 +626,16 @@ func NewHub(
 
 // NewDefaultHub uses default dependencies to initializes a new hub.
 func NewDefaultHub() *Hub {
-	logger := NewLogrusLogger(NewLogrusOptions())
+	logger := NewLogrusLogger(NewLogrusLoggerOptions())
 
-	upgraderOptions := NewGorillaUpgraderOptions()
+	upgraderOptions := NewGorillaConnectionUpgraderOptions()
 	upgrader := NewGorillaConnectionUpgrader(upgraderOptions, logger)
 
 	clientStoreOptions := NewClientStoreOptions()
 	clientStore := NewClientStore(clientStoreOptions, logger)
 
 	uuidGenerator := SatoriUUIDGenerator{}
+
 	clientOptions := NewClientOptions()
 	clientFactory := NewClientFactory(clientOptions, uuidGenerator, upgrader, logger)
 

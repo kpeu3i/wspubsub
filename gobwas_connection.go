@@ -13,6 +13,7 @@ import (
 
 var _ WebsocketConnection = (*GobwasConnection)(nil)
 
+// GobwasConnection is an implementation of WebsocketConnection.
 type GobwasConnection struct {
 	conn               net.Conn
 	logger             Logger
@@ -22,6 +23,7 @@ type GobwasConnection struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// Read reads a message from WebSocket connection.
 func (c *GobwasConnection) Read() (Message, error) {
 	opCode, bytes, err := c.doRead()
 	if err != nil {
@@ -36,6 +38,7 @@ func (c *GobwasConnection) Read() (Message, error) {
 	return message, nil
 }
 
+// Write writes a message to WebSocket connection.
 func (c *GobwasConnection) Write(message Message) error {
 	if c.IsDebug {
 		now := time.Now()
@@ -60,6 +63,7 @@ func (c *GobwasConnection) Write(message Message) error {
 	return nil
 }
 
+// Close closes a WebSocket connection.
 func (c *GobwasConnection) Close() error {
 	if c.IsDebug {
 		now := time.Now()

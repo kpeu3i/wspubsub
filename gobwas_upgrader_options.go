@@ -4,16 +4,18 @@ import (
 	"time"
 )
 
-type GobwasUpgraderOptions struct {
+// GobwasConnectionUpgraderOptions represents configuration of the GobwasConnectionUpgrader.
+type GobwasConnectionUpgraderOptions struct {
 	ReadTimout         time.Duration
 	WriteTimout        time.Duration
 	IsDebug            bool
 	DebugFuncTimeLimit time.Duration
 }
 
+// NewGobwasUpgraderOptions initializes a new GobwasConnectionUpgraderOptions.
 // nolint: gomnd
-func NewGobwasUpgraderOptions() GobwasUpgraderOptions {
-	options := GobwasUpgraderOptions{
+func NewGobwasConnectionUpgraderOptions() GobwasConnectionUpgraderOptions {
+	options := GobwasConnectionUpgraderOptions{
 		ReadTimout:         60 * time.Second,
 		WriteTimout:        10 * time.Second,
 		IsDebug:            false,

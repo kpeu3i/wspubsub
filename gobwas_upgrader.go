@@ -9,11 +9,13 @@ import (
 
 var _ WebsocketConnectionUpgrader = (*GobwasConnectionUpgrader)(nil)
 
+// GobwasConnectionUpgrader is an implementation of WebsocketConnectionUpgrader.
 type GobwasConnectionUpgrader struct {
 	logger  Logger
-	options GobwasUpgraderOptions
+	options GobwasConnectionUpgraderOptions
 }
 
+// GobwasConnectionUpgrader upgrades HTTP connection to the WebSocket connection.
 func (u *GobwasConnectionUpgrader) Upgrade(w http.ResponseWriter, r *http.Request) (WebsocketConnection, error) {
 	if u.options.IsDebug {
 		now := time.Now()
@@ -42,6 +44,7 @@ func (u *GobwasConnectionUpgrader) Upgrade(w http.ResponseWriter, r *http.Reques
 	return gobwasConnection, nil
 }
 
-func NewGobwasConnectionUpgrader(options GobwasUpgraderOptions, logger Logger) *GobwasConnectionUpgrader {
+// NewGobwasConnectionUpgrader initializes a new GobwasConnectionUpgrader.
+func NewGobwasConnectionUpgrader(options GobwasConnectionUpgraderOptions, logger Logger) *GobwasConnectionUpgrader {
 	return &GobwasConnectionUpgrader{options: options, logger: logger}
 }

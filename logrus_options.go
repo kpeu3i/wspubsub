@@ -5,16 +5,18 @@ import (
 	"os"
 )
 
-type LogrusOptions struct {
-	Level     Level
-	Formatter Formatter
+// LogrusLoggerOptions represents configuration of the LogrusLogger.
+type LogrusLoggerOptions struct {
+	Level     LogrusLevel
+	Formatter LogrusFormatter
 	Output    io.Writer
 }
 
-func NewLogrusOptions() LogrusOptions {
-	options := LogrusOptions{
-		Level:     LevelInfo,
-		Formatter: FormatterText,
+// NewLogrusLoggerOptions initializes a new LogrusLoggerOptions.
+func NewLogrusLoggerOptions() LogrusLoggerOptions {
+	options := LogrusLoggerOptions{
+		Level:     LogrusLevelInfo,
+		Formatter: LogrusFormatterText,
 		Output:    os.Stdout,
 	}
 

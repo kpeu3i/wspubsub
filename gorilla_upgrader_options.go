@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-type GorillaUpgraderOptions struct {
+// GorillaConnectionUpgraderOptions represents configuration of the GorillaConnectionUpgrader.
+type GorillaConnectionUpgraderOptions struct {
 	MaxMessageSize     int64
 	ReadTimout         time.Duration
 	WriteTimout        time.Duration
@@ -20,9 +21,10 @@ type GorillaUpgraderOptions struct {
 	DebugFuncTimeLimit time.Duration
 }
 
+// NewGorillaConnectionUpgraderOptions initializes a new GorillaConnectionUpgraderOptions.
 // nolint: gomnd
-func NewGorillaUpgraderOptions() GorillaUpgraderOptions {
-	options := GorillaUpgraderOptions{
+func NewGorillaConnectionUpgraderOptions() GorillaConnectionUpgraderOptions {
+	options := GorillaConnectionUpgraderOptions{
 		MaxMessageSize:  1 * 1024 * 1024,
 		ReadTimout:      60 * time.Second,
 		WriteTimout:     10 * time.Second,

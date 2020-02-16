@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewGobwasUpgraderOptions(t *testing.T) {
-	options := wspubsub.NewGobwasUpgraderOptions()
+	options := wspubsub.NewGobwasConnectionUpgraderOptions()
 	require.NotZero(t, options.ReadTimout)
 	require.NotZero(t, options.WriteTimout)
 	require.False(t, options.IsDebug)
